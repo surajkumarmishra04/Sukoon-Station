@@ -3,7 +3,7 @@
   "source": "youtube",
   "tracks": [
     {
-      "id": "night-demo-01",
+      "id": "night-01",
       "title": "Night Track 01",
       "artist": "Demo",
       "youtubeId": "",
@@ -12,7 +12,7 @@
       "source": "youtube"
     },
     {
-      "id": "night-demo-02",
+      "id": "night-02",
       "title": "Night Track 02",
       "artist": "Demo",
       "youtubeId": "",
@@ -21,7 +21,7 @@
       "source": "youtube"
     },
     {
-      "id": "night-demo-03",
+      "id": "night-03",
       "title": "Night Track 03",
       "artist": "Demo",
       "youtubeId": "",
@@ -30,7 +30,7 @@
       "source": "youtube"
     },
     {
-      "id": "study-demo-01",
+      "id": "study-01",
       "title": "Study Track 01",
       "artist": "Demo",
       "youtubeId": "",
@@ -39,7 +39,7 @@
       "source": "youtube"
     },
     {
-      "id": "study-demo-02",
+      "id": "study-02",
       "title": "Study Track 02",
       "artist": "Demo",
       "youtubeId": "",
@@ -48,7 +48,7 @@
       "source": "youtube"
     },
     {
-      "id": "study-demo-03",
+      "id": "study-03",
       "title": "Study Track 03",
       "artist": "Demo",
       "youtubeId": "",
@@ -57,7 +57,7 @@
       "source": "youtube"
     },
     {
-      "id": "morning-demo-01",
+      "id": "morning-01",
       "title": "Morning Track 01",
       "artist": "Demo",
       "youtubeId": "",
@@ -66,7 +66,7 @@
       "source": "youtube"
     },
     {
-      "id": "morning-demo-02",
+      "id": "morning-02",
       "title": "Morning Track 02",
       "artist": "Demo",
       "youtubeId": "",
@@ -75,7 +75,7 @@
       "source": "youtube"
     },
     {
-      "id": "morning-demo-03",
+      "id": "morning-03",
       "title": "Morning Track 03",
       "artist": "Demo",
       "youtubeId": "",
@@ -84,7 +84,7 @@
       "source": "youtube"
     },
     {
-      "id": "rain-demo-01",
+      "id": "rain-01",
       "title": "Rain Track 01",
       "artist": "Demo",
       "youtubeId": "",
@@ -93,7 +93,7 @@
       "source": "youtube"
     },
     {
-      "id": "rain-demo-02",
+      "id": "rain-02",
       "title": "Rain Track 02",
       "artist": "Demo",
       "youtubeId": "",
@@ -102,7 +102,7 @@
       "source": "youtube"
     },
     {
-      "id": "rain-demo-03",
+      "id": "rain-03",
       "title": "Rain Track 03",
       "artist": "Demo",
       "youtubeId": "",
@@ -111,7 +111,7 @@
       "source": "youtube"
     },
     {
-      "id": "safar-demo-01",
+      "id": "safar-01",
       "title": "Safar Track 01",
       "artist": "Demo",
       "youtubeId": "",
@@ -120,7 +120,7 @@
       "source": "youtube"
     },
     {
-      "id": "safar-demo-02",
+      "id": "safar-02",
       "title": "Safar Track 02",
       "artist": "Demo",
       "youtubeId": "",
@@ -129,7 +129,7 @@
       "source": "youtube"
     },
     {
-      "id": "safar-demo-03",
+      "id": "safar-03",
       "title": "Safar Track 03",
       "artist": "Demo",
       "youtubeId": "",
@@ -138,7 +138,7 @@
       "source": "youtube"
     },
     {
-      "id": "workout-demo-01",
+      "id": "workout-01",
       "title": "Workout Track 01",
       "artist": "Demo",
       "youtubeId": "",
@@ -147,7 +147,7 @@
       "source": "youtube"
     },
     {
-      "id": "workout-demo-02",
+      "id": "workout-02",
       "title": "Workout Track 02",
       "artist": "Demo",
       "youtubeId": "",
@@ -156,7 +156,7 @@
       "source": "youtube"
     },
     {
-      "id": "workout-demo-03",
+      "id": "workout-03",
       "title": "Workout Track 03",
       "artist": "Demo",
       "youtubeId": "",

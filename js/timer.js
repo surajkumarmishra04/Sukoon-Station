@@ -1,488 +1,473 @@
-/* =====================================================
-   SUKOON STATION — js/timer.js
-   Sleep Timer ONLY — countdown, panel, and music fade-out hook.
-   (Background rotation lives in themes.js — never touched here.)
-   ===================================================== */
+/**
+ * ==========================================================================
+ * SUKOON STATION — VERSION 1.0 (NIGHT MOOD)
+ * Sleep Timer Management System (js/timer.js)
+ * ==========================================================================
+ */
 
-(function () {
-    "use strict";
+(function (global) {
+  'use strict';
 
-    /* =====================================================
-       1. CONFIG / CONSTANTS
-       ===================================================== */
+  /* ==========================================================================
+     1. CONSTANTS & CONFIGURATION
+     ========================================================================== */
 
-    // Duration presets in seconds, keyed by the button's data-timer value.
-    const DURATIONS = {
-        30: 30 * 60,
-        50: 50 * 60,
-        60: 60 * 60,
-        120: 120 * 60,
-    };
+  const DEFAULT_FADE_DURATION = 30; // Seconds over which volume fades down
+  const FADE_INTERVAL_STEP = 500; // Step frequency for volume reduction (ms)
+  const RESET_DELAY_AFTER_COMPLETION = 6000; // Time before resetting UI post-completion
 
-    const CUSTOM_MIN_MINUTES = 1;
-    const CUSTOM_MAX_MINUTES = 24 * 60; // 24 hours
+  // Map data-time values (in minutes) to seconds
+  const PRESET_DURATIONS = {
+    '0': 0,
+    '30': 30 * 60,
+    '50': 50 * 60,
+    '60': 60 * 60,
+    '120': 120 * 60
+  };
 
-    const FADE_OUT_DURATION = 30 * 1000; // 30 seconds, gentle fade
-    const FADE_STEP_INTERVAL = 300; // ms between volume steps
+  /* ==========================================================================
+     2. INTERNAL STATE
+     ========================================================================== */
 
-    const COMPLETE_MESSAGE_DURATION = 4000; // how long "Good night" stays up
+  const state = {
+    timerIntervalId: null,
+    fadeIntervalId: null,
+    timerEndTime: null,
+    selectedDurationSec: 0,
+    isTimerRunning: false,
+    isFading: false,
+    initialVolumeBeforeFade: 80
+  };
 
-    const PANEL_OPEN_ANIM_DURATION = 300; // matches animations.css panel-open
-    const PANEL_CLOSE_ANIM_DURATION = 200; // matches animations.css panel-close
+  // Cached DOM References
+  let dom = {
+    toggleBtn: null,
+    panel: null,
+    closeBtn: null,
+    countdownDisplay: null,
+    optionButtons: []
+  };
 
-    /* =====================================================
-       2. STATE
-       ===================================================== */
+  /* ==========================================================================
+     3. DOM CACHING & SETUP
+     ========================================================================== */
 
-    const state = {
-        timerInterval: null,
-        timerEndTime: null,
-        selectedDuration: null, // seconds
-        isTimerRunning: false,
-        isPanelOpen: false,
-        activeOptionValue: "off",
-        fadeInterval: null,
-        completeResetTimeout: null,
-    };
+  function cacheDomElements() {
+    dom.toggleBtn = document.getElementById('sleep-timer-toggle');
+    dom.panel = document.getElementById('sleep-timer-panel');
+    dom.closeBtn = document.getElementById('sleep-timer-close');
+    dom.countdownDisplay = document.getElementById('sleep-countdown');
+    dom.optionButtons = dom.panel
+      ? Array.from(dom.panel.querySelectorAll('.timer-option-btn'))
+      : [];
+  }
 
-    /* =====================================================
-       3. DOM REFERENCES
-       ===================================================== */
+  /* ==========================================================================
+     4. TIME FORMATTING UTILITIES
+     ========================================================================== */
 
-    const elements = {};
+  /**
+   * Formats remaining seconds into HH:MM:SS or MM:SS strings.
+   * @param {number} totalSeconds
+   * @returns {string}
+   */
+  function formatTimeDisplay(totalSeconds) {
+    const safeSeconds = Math.max(0, Math.floor(totalSeconds));
+    const hours = Math.floor(safeSeconds / 3600);
+    const minutes = Math.floor((safeSeconds % 3600) / 60);
+    const seconds = safeSeconds % 60;
 
-    function cacheElements() {
-        elements.toggle = document.getElementById("sleep-timer-toggle");
-        elements.panel = document.getElementById("sleep-timer-panel");
-        elements.closeBtn = document.getElementById("sleep-timer-panel-close");
-        elements.countdown = document.getElementById("sleep-countdown");
-        elements.options = elements.panel
-            ? Array.from(elements.panel.querySelectorAll(".timer-option"))
-            : [];
+    const pad = (num) => String(num).padStart(2, '0');
+
+    if (hours > 0) {
+      return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
     }
+    return `${pad(minutes)}:${pad(seconds)}`;
+  }
 
-    /* =====================================================
-       4. TIME FORMATTING
-       ===================================================== */
+  /* ==========================================================================
+     5. PANEL VISIBILITY & ACCESSIBILITY MANAGEMENT
+     ========================================================================== */
 
-    function formatTime(totalSeconds) {
-        const safeSeconds = Math.max(0, Math.floor(totalSeconds));
-        const hours = Math.floor(safeSeconds / 3600);
-        const minutes = Math.floor((safeSeconds % 3600) / 60);
-        const seconds = safeSeconds % 60;
+  /**
+   * Opens the Sleep Timer panel with proper ARIA attributes.
+   */
+  function openPanel() {
+    if (!dom.panel) return;
 
-        const mm = String(minutes).padStart(2, "0");
-        const ss = String(seconds).padStart(2, "0");
+    dom.panel.removeAttribute('hidden');
+    dom.panel.classList.remove('is-closing');
 
-        if (hours > 0) {
-            const hh = String(hours).padStart(2, "0");
-            return `${hh}:${mm}:${ss}`;
-        }
-
-        return `${mm}:${ss}`;
+    if (dom.toggleBtn) {
+      dom.toggleBtn.setAttribute('aria-expanded', 'true');
     }
-
-    /* =====================================================
-       5. UI UPDATES
-       ===================================================== */
-
-    function updateCountdownDisplay(text) {
-        if (elements.countdown) {
-            elements.countdown.textContent = text;
-        }
-    }
-
-    function updateToggleLabel(remainingSeconds) {
-        if (!elements.toggle) return;
-
-        if (remainingSeconds === null) {
-            elements.toggle.textContent = "Sleep Timer";
-            return;
-        }
-
-        elements.toggle.textContent = `\u25F7 ${formatTime(remainingSeconds)}`;
-    }
-
-    function setActiveOption(value) {
-        state.activeOptionValue = value;
-
-        elements.options.forEach((btn) => {
-            const isActive = btn.dataset.timer === value;
-            btn.classList.toggle("is-active", isActive);
-            btn.setAttribute("aria-pressed", isActive ? "true" : "false");
-        });
-    }
-
-    /* =====================================================
-       6. MUSIC FADE-OUT INTERFACE
-       ===================================================== */
-
-    /**
-     * Attempts to gently fade out and stop the music via a decoupled
-     * player interface (window.SukoonPlayer), if one is available.
-     * Never throws — safe to call even if player.js hasn't loaded.
-     */
-    function fadeOutMusic() {
-        return new Promise((resolve) => {
-            const player = window.SukoonPlayer;
-
-            if (!player || typeof player.setVolume !== "function" || typeof player.getVolume !== "function") {
-                console.warn("[Sukoon Station] SukoonPlayer API not available — skipping fade-out.");
-                resolve();
-                return;
-            }
-
-            const startVolume = Number(player.getVolume());
-            const safeStartVolume = Number.isFinite(startVolume) ? startVolume : 0;
-
-            if (safeStartVolume <= 0) {
-                stopPlayerSafely(player);
-                resolve();
-                return;
-            }
-
-            const totalSteps = Math.max(1, Math.round(FADE_OUT_DURATION / FADE_STEP_INTERVAL));
-            const volumeStep = safeStartVolume / totalSteps;
-            let currentStep = 0;
-
-            clearFadeInterval();
-
-            state.fadeInterval = window.setInterval(() => {
-                currentStep += 1;
-                const nextVolume = Math.max(0, safeStartVolume - volumeStep * currentStep);
-
-                try {
-                    player.setVolume(nextVolume);
-                } catch (err) {
-                    console.warn("[Sukoon Station] Error while fading player volume:", err);
-                }
-
-                if (currentStep >= totalSteps || nextVolume <= 0) {
-                    clearFadeInterval();
-                    stopPlayerSafely(player);
-                    resolve();
-                }
-            }, FADE_STEP_INTERVAL);
-        });
-    }
-
-    function stopPlayerSafely(player) {
-        if (player && typeof player.pause === "function") {
-            try {
-                player.pause();
-            } catch (err) {
-                console.warn("[Sukoon Station] Error while pausing player:", err);
-            }
-        }
-    }
-
-    function clearFadeInterval() {
-        if (state.fadeInterval !== null) {
-            clearInterval(state.fadeInterval);
-            state.fadeInterval = null;
-        }
-    }
-
-    /* =====================================================
-       7. COUNTDOWN ENGINE (single active interval)
-       ===================================================== */
-
-    function clearTimerInterval() {
-        if (state.timerInterval !== null) {
-            clearInterval(state.timerInterval);
-            state.timerInterval = null;
-        }
-    }
-
-    function clearCompleteResetTimeout() {
-        if (state.completeResetTimeout !== null) {
-            clearTimeout(state.completeResetTimeout);
-            state.completeResetTimeout = null;
-        }
-    }
-
-    function tick() {
-        const remainingMs = state.timerEndTime - Date.now();
-        const remainingSeconds = Math.max(0, Math.round(remainingMs / 1000));
-
-        if (remainingSeconds <= 0) {
-            handleTimerComplete();
-            return;
-        }
-
-        updateCountdownDisplay(formatTime(remainingSeconds));
-        updateToggleLabel(remainingSeconds);
-    }
-
-    /**
-     * Starts (or restarts) the Sleep Timer for the given duration.
-     * Always cancels any previously running timer first, guaranteeing
-     * only one active countdown at a time.
-     */
-    function startTimer(durationSeconds, optionValue) {
-        if (!Number.isFinite(durationSeconds) || durationSeconds <= 0) {
-            console.warn("[Sukoon Station] Invalid sleep timer duration:", durationSeconds);
-            return;
-        }
-
-        clearTimerInterval();
-        clearCompleteResetTimeout();
-        clearFadeInterval();
-
-        state.timerEndTime = Date.now() + durationSeconds * 1000;
-        state.selectedDuration = durationSeconds;
-        state.isTimerRunning = true;
-
-        setActiveOption(optionValue);
-        tick(); // immediate update so the UI doesn't wait a full second
-        state.timerInterval = window.setInterval(tick, 1000);
-    }
-
-    /**
-     * Cancels the Sleep Timer without affecting music playback.
-     */
-    function stopTimer() {
-        clearTimerInterval();
-        clearCompleteResetTimeout();
-        clearFadeInterval();
-
-        state.timerEndTime = null;
-        state.selectedDuration = null;
-        state.isTimerRunning = false;
-
-        setActiveOption("off");
-        updateCountdownDisplay("Off");
-        updateToggleLabel(null);
-    }
-
-    async function handleTimerComplete() {
-        clearTimerInterval();
-
-        state.isTimerRunning = false;
-        updateCountdownDisplay("Good night");
-        updateToggleLabel(null);
-
-        await fadeOutMusic();
-
-        // Give the "Good night" message a calm moment before resetting.
-        clearCompleteResetTimeout();
-        state.completeResetTimeout = window.setTimeout(() => {
-            state.timerEndTime = null;
-            state.selectedDuration = null;
-            setActiveOption("off");
-            updateCountdownDisplay("Off");
-            state.completeResetTimeout = null;
-        }, COMPLETE_MESSAGE_DURATION);
-    }
-
-    /* =====================================================
-       8. CUSTOM DURATION
-       ===================================================== */
-
-    /**
-     * Validates and converts a user-supplied number of minutes into
-     * seconds. Returns null (and logs a reason) for invalid input.
-     */
-    function parseCustomMinutes(rawValue) {
-        const minutes = Number(rawValue);
-
-        if (!Number.isFinite(minutes)) {
-            console.warn("[Sukoon Station] Custom timer value is not a number:", rawValue);
-            return null;
-        }
-
-        if (minutes < CUSTOM_MIN_MINUTES || minutes > CUSTOM_MAX_MINUTES) {
-            console.warn(
-                `[Sukoon Station] Custom timer must be between ${CUSTOM_MIN_MINUTES} and ${CUSTOM_MAX_MINUTES} minutes.`
-            );
-            return null;
-        }
-
-        return minutes * 60;
-    }
-
-    /**
-     * Handles the "Custom" option. The current HTML only provides a
-     * placeholder button (no input field yet), so this looks for an
-     * optional input element first and falls back to a single prompt
-     * so the feature is usable today without changing the HTML.
-     * Once a real input exists in the panel, this will pick it up
-     * automatically via #custom-timer-input.
-     */
-    function handleCustomOption() {
-        const existingInput = document.getElementById("custom-timer-input");
-
-        if (existingInput) {
-            const seconds = parseCustomMinutes(existingInput.value);
-            if (seconds !== null) {
-                startTimer(seconds, "custom");
-            } else {
-                updateCountdownDisplay("Enter 1–1440 minutes");
-            }
-            return;
-        }
-
-        // Fallback for Version 1.0: no dedicated input exists yet.
-        const response = window.prompt("Custom sleep timer — minutes (1–1440):", "45");
-        if (response === null) return; // user cancelled
-
-        const seconds = parseCustomMinutes(response);
-        if (seconds !== null) {
-            startTimer(seconds, "custom");
-        } else {
-            updateCountdownDisplay("Enter 1–1440 minutes");
-        }
-    }
-
-    /* =====================================================
-       9. TIMER OPTION SELECTION
-       ===================================================== */
-
-    function handleOptionClick(event) {
-        const button = event.currentTarget;
-        const value = button.dataset.timer;
-
-        if (!value) return;
-
-        if (value === "off") {
-            stopTimer();
-            return;
-        }
-
-        if (value === "custom") {
-            handleCustomOption();
-            return;
-        }
-
-        const durationSeconds = DURATIONS[value];
-        if (!durationSeconds) {
-            console.warn(`[Sukoon Station] Unknown sleep timer option: "${value}"`);
-            return;
-        }
-
-        startTimer(durationSeconds, value);
-    }
-
-    function bindOptionEvents() {
-        elements.options.forEach((btn) => {
-            btn.addEventListener("click", handleOptionClick);
-        });
-    }
-
-    /* =====================================================
-       10. PANEL OPEN / CLOSE
-       ===================================================== */
-
-    function openPanel() {
-        if (!elements.panel || !elements.toggle) return;
-        if (state.isPanelOpen) return;
-
-        elements.panel.hidden = false;
-        elements.panel.classList.remove("is-closing");
-        // Force reflow so the entrance animation reliably replays.
-        // eslint-disable-next-line no-unused-expressions
-        elements.panel.offsetHeight;
-        elements.panel.classList.add("is-opening");
-
-        window.setTimeout(() => {
-            elements.panel.classList.remove("is-opening");
-        }, PANEL_OPEN_ANIM_DURATION);
-
-        elements.toggle.setAttribute("aria-expanded", "true");
-        state.isPanelOpen = true;
-
-        document.addEventListener("keydown", handlePanelEscape);
-        document.addEventListener("click", handleOutsideClick, true);
-    }
-
-    function closePanel() {
-        if (!elements.panel || !elements.toggle) return;
-        if (!state.isPanelOpen) return;
-
-        elements.panel.classList.remove("is-opening");
-        elements.panel.classList.add("is-closing");
-
-        window.setTimeout(() => {
-            elements.panel.hidden = true;
-            elements.panel.classList.remove("is-closing");
-        }, PANEL_CLOSE_ANIM_DURATION);
-
-        elements.toggle.setAttribute("aria-expanded", "false");
-        state.isPanelOpen = false;
-
-        document.removeEventListener("keydown", handlePanelEscape);
-        document.removeEventListener("click", handleOutsideClick, true);
-    }
-
-    function togglePanel() {
-        if (state.isPanelOpen) {
-            closePanel();
-        } else {
-            openPanel();
-        }
-    }
-
-    function handlePanelEscape(event) {
-        if (event.key !== "Escape") return;
-        if (!state.isPanelOpen) return;
-        closePanel();
-    }
-
-    function handleOutsideClick(event) {
-        if (!state.isPanelOpen) return;
-        if (!elements.panel) return;
-
-        const clickedInsidePanel = elements.panel.contains(event.target);
-        const clickedToggle = elements.toggle && elements.toggle.contains(event.target);
-
-        if (!clickedInsidePanel && !clickedToggle) {
-            closePanel();
-        }
-    }
-
-    function bindPanelEvents() {
-        if (elements.toggle) {
-            elements.toggle.addEventListener("click", togglePanel);
-        }
-
-        if (elements.closeBtn) {
-            elements.closeBtn.addEventListener("click", closePanel);
-        }
-    }
-
-    /* =====================================================
-       11. INITIALIZATION
-       ===================================================== */
-
-    function initializeSleepTimer() {
-        cacheElements();
-
-        if (!elements.toggle || !elements.panel) {
-            console.warn("[Sukoon Station] Sleep timer elements not found — timer.js cannot initialize.");
-            return;
-        }
-
-        bindPanelEvents();
-        bindOptionEvents();
-
-        setActiveOption("off");
-        updateCountdownDisplay("Off");
-        updateToggleLabel(null);
-    }
-
-    if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", initializeSleepTimer);
+  }
+
+  /**
+   * Closes the Sleep Timer panel cleanly.
+   */
+  function closePanel() {
+    if (!dom.panel || dom.panel.hasAttribute('hidden')) return;
+
+    dom.panel.classList.add('is-closing');
+
+    setTimeout(() => {
+      dom.panel.setAttribute('hidden', '');
+      dom.panel.classList.remove('is-closing');
+      if (dom.toggleBtn) {
+        dom.toggleBtn.setAttribute('aria-expanded', 'false');
+      }
+    }, 200); // Matches panel close CSS transition duration
+  }
+
+  /**
+   * Toggles panel visibility.
+   */
+  function togglePanel() {
+    if (!dom.panel) return;
+    const isHidden = dom.panel.hasAttribute('hidden');
+    if (isHidden) {
+      openPanel();
     } else {
-        initializeSleepTimer();
+      closePanel();
+    }
+  }
+
+  /* ==========================================================================
+     6. TIMER LOGIC & COUNTDOWN ENGINE
+     ========================================================================== */
+
+  /**
+   * Starts a countdown timer for a given duration in seconds.
+   * @param {number} durationSeconds - Total duration to run.
+   */
+  function startTimer(durationSeconds) {
+    // Validate inputs
+    const duration = parseInt(durationSeconds, 10);
+    if (isNaN(duration) || duration <= 0) {
+      cancelTimer();
+      return;
     }
 
-    /* =====================================================
-       12. PUBLIC API
-       ===================================================== */
+    // Clear any active timers and active fade processes
+    clearActiveIntervals();
 
-    window.SukoonTimer = {
-        startTimer,
-        stopTimer,
-        getState: () => ({ ...state }),
-    };
-})();
+    state.selectedDurationSec = duration;
+    state.timerEndTime = Date.now() + duration * 1000;
+    state.isTimerRunning = true;
+
+    // Apply active pulsing style to countdown
+    if (dom.countdownDisplay) {
+      dom.countdownDisplay.classList.add('is-running');
+    }
+
+    // Perform immediate UI tick
+    updateTimerTick();
+
+    // Start precision interval loop
+    state.timerIntervalId = setInterval(updateTimerTick, 1000);
+  }
+
+  /**
+   * Called every second to evaluate remaining time against timestamp.
+   */
+  function updateTimerTick() {
+    if (!state.isTimerRunning || !state.timerEndTime) return;
+
+    const remainingMs = state.timerEndTime - Date.now();
+    const remainingSeconds = Math.ceil(remainingMs / 1000);
+
+    if (remainingSeconds <= 0) {
+      onTimerComplete();
+      return;
+    }
+
+    const formattedTime = formatTimeDisplay(remainingSeconds);
+
+    // Update panel countdown
+    if (dom.countdownDisplay) {
+      dom.countdownDisplay.textContent = formattedTime;
+    }
+
+    // Update bottom-right toggle button label subtly
+    if (dom.toggleBtn) {
+      dom.toggleBtn.textContent = `◷ ${formattedTime}`;
+    }
+  }
+
+  /**
+   * Cancels and resets the Sleep Timer completely without stopping music.
+   */
+  function cancelTimer() {
+    clearActiveIntervals();
+
+    state.isTimerRunning = false;
+    state.timerEndTime = null;
+    state.selectedDurationSec = 0;
+
+    // Reset UI displays
+    if (dom.countdownDisplay) {
+      dom.countdownDisplay.textContent = 'Off';
+      dom.countdownDisplay.classList.remove('is-running');
+    }
+
+    if (dom.toggleBtn) {
+      dom.toggleBtn.textContent = 'Sleep Timer';
+    }
+
+    updateActiveButtonUI('0');
+  }
+
+  /**
+   * Clears all running timer intervals safely.
+   */
+  function clearActiveIntervals() {
+    if (state.timerIntervalId) {
+      clearInterval(state.timerIntervalId);
+      state.timerIntervalId = null;
+    }
+    if (state.fadeIntervalId) {
+      clearInterval(state.fadeIntervalId);
+      state.fadeIntervalId = null;
+    }
+    state.isFading = false;
+  }
+
+  /* ==========================================================================
+     7. TIMER COMPLETION & MUSIC FADE-OUT
+     ========================================================================== */
+
+  /**
+   * Executes when countdown reaches zero: initiates audio fade-out and resets UI.
+   */
+  function onTimerComplete() {
+    clearActiveIntervals();
+    state.isTimerRunning = false;
+
+    // Display peaceful completion message
+    if (dom.countdownDisplay) {
+      dom.countdownDisplay.textContent = 'Good night';
+      dom.countdownDisplay.classList.remove('is-running');
+    }
+
+    if (dom.toggleBtn) {
+      dom.toggleBtn.textContent = '◷ Complete';
+    }
+
+    // Gracefully fade out music
+    fadeOutMusic(DEFAULT_FADE_DURATION);
+
+    // Reset button and status after delay
+    setTimeout(() => {
+      cancelTimer();
+    }, RESET_DELAY_AFTER_COMPLETION);
+  }
+
+  /**
+   * Gradually attenuates music volume to 0 before pausing playback.
+   * @param {number} fadeDurationSeconds - Total seconds to fade volume down.
+   */
+  function fadeOutMusic(fadeDurationSeconds = 30) {
+    const player = global.SukoonPlayer;
+
+    // Graceful fallback if player is unavailable or inactive
+    if (!player || typeof player.setVolume !== 'function' || typeof player.getVolume !== 'function') {
+      if (player && typeof player.pause === 'function') {
+        player.pause();
+      }
+      return;
+    }
+
+    const currentVolume = player.getVolume();
+    state.initialVolumeBeforeFade = currentVolume > 0 ? currentVolume : 80;
+
+    if (currentVolume <= 0) {
+      if (typeof player.pause === 'function') player.pause();
+      return;
+    }
+
+    state.isFading = true;
+    const totalSteps = (fadeDurationSeconds * 1000) / FADE_INTERVAL_STEP;
+    const volumeDecrementPerStep = currentVolume / totalSteps;
+    let stepCount = 0;
+
+    state.fadeIntervalId = setInterval(() => {
+      stepCount++;
+      const nextVolume = Math.max(0, currentVolume - (volumeDecrementPerStep * stepCount));
+
+      player.setVolume(nextVolume);
+
+      if (nextVolume <= 0 || stepCount >= totalSteps) {
+        clearInterval(state.fadeIntervalId);
+        state.fadeIntervalId = null;
+        state.isFading = false;
+
+        // Pause playback
+        if (typeof player.pause === 'function') {
+          player.pause();
+        }
+
+        // Restore original volume setting for subsequent user plays
+        setTimeout(() => {
+          player.setVolume(state.initialVolumeBeforeFade);
+        }, 500);
+      }
+    }, FADE_INTERVAL_STEP);
+  }
+
+  /* ==========================================================================
+     8. CUSTOM DURATION PROMPT / HANDLER
+     ========================================================================== */
+
+  /**
+   * Prompts user safely for custom minutes or sets duration directly.
+   * @param {number|null} customMinutes
+   */
+  function handleCustomDuration(customMinutes = null) {
+    let minutes = customMinutes;
+
+    if (minutes === null) {
+      const input = prompt('Enter sleep timer duration in minutes (1 - 1440):', '45');
+      if (input === null) return; // User cancelled prompt
+      minutes = parseInt(input.trim(), 10);
+    }
+
+    if (isNaN(minutes) || minutes < 1 || minutes > 1440) {
+      alert('Please enter a valid duration between 1 minute and 24 hours (1440 minutes).');
+      return;
+    }
+
+    const durationSeconds = minutes * 60;
+    updateActiveButtonUI('custom');
+    startTimer(durationSeconds);
+  }
+
+  /* ==========================================================================
+     9. UI BUTTON SELECTION & EVENT DELEGATION
+     ========================================================================== */
+
+  /**
+   * Updates visual active highlight on the option buttons.
+   * @param {string} selectedKey
+   */
+  function updateActiveButtonUI(selectedKey) {
+    if (!dom.optionButtons.length) return;
+
+    dom.optionButtons.forEach((btn) => {
+      const timeAttr = btn.getAttribute('data-time');
+      if (timeAttr === String(selectedKey)) {
+        btn.classList.add('active');
+        btn.setAttribute('aria-pressed', 'true');
+      } else {
+        btn.classList.remove('active');
+        btn.setAttribute('aria-pressed', 'false');
+      }
+    });
+  }
+
+  /**
+   * Attaches event listeners for panel toggling, button selections, and dismissal.
+   */
+  function setupEventListeners() {
+    // Toggle button click
+    if (dom.toggleBtn) {
+      dom.toggleBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        togglePanel();
+      });
+    }
+
+    // Close button click
+    if (dom.closeBtn) {
+      dom.closeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        closePanel();
+      });
+    }
+
+    // Timer option selections via delegation inside panel
+    if (dom.panel) {
+      dom.panel.addEventListener('click', (e) => {
+        const optionBtn = e.target.closest('.timer-option-btn');
+        if (!optionBtn) return;
+
+        const timeValue = optionBtn.getAttribute('data-time');
+
+        if (timeValue === 'custom') {
+          handleCustomDuration();
+          return;
+        }
+
+        if (timeValue === '0') {
+          cancelTimer();
+          return;
+        }
+
+        const durationSeconds = PRESET_DURATIONS[timeValue];
+        if (durationSeconds !== undefined) {
+          updateActiveButtonUI(timeValue);
+          startTimer(durationSeconds);
+        }
+      });
+
+      // Prevent clicks inside panel from bubbling to global window dismisser
+      dom.panel.addEventListener('click', (e) => {
+        e.stopPropagation();
+      });
+    }
+
+    // Escape key listener to close panel
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && dom.panel && !dom.panel.hasAttribute('hidden')) {
+        closePanel();
+      }
+    });
+
+    // Click outside panel to close
+    document.addEventListener('click', (e) => {
+      if (
+        dom.panel &&
+        !dom.panel.hasAttribute('hidden') &&
+        !dom.panel.contains(e.target) &&
+        e.target !== dom.toggleBtn
+      ) {
+        closePanel();
+      }
+    });
+  }
+
+  /* ==========================================================================
+     10. INITIALIZATION & PUBLIC API
+     ========================================================================== */
+
+  /**
+   * Initializes DOM bindings and listeners.
+   */
+  function initializeTimer() {
+    cacheDomElements();
+    setupEventListeners();
+  }
+
+  // Automatic bootstrap on DOM Ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeTimer);
+  } else {
+    initializeTimer();
+  }
+
+  // Public API Export
+  const SukoonTimer = {
+    initializeTimer,
+    startTimer,
+    cancelTimer,
+    setCustomDuration: handleCustomDuration,
+    openPanel,
+    closePanel,
+    togglePanel,
+    fadeOutMusic,
+    getState: () => ({ ...state })
+  };
+
+  global.SukoonTimer = SukoonTimer;
+
+})(typeof window !== 'undefined' ? window : this);
