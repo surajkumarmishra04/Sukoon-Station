@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- ================= META / SEO ================= -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0b0d12">
+    <meta name="description" content="A cinematic music listening experience built around moods, visuals and music.">
+    <title>Sukoon Station — Music for Every Mood</title>
+
+    <!-- ================= FAVICON ================= -->
+    <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+
+    <!-- ================= CSS LINKS ================= -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="css/animations.css">
+</head>
+<body>
+
+    <main id="app">
+
+        <!-- ================= 1. FULL-SCREEN BACKGROUND ================= -->
+        <div id="background-layer" aria-hidden="true">
+            <img
+                id="background-image"
+                src="assets/images/night/night-01.jpg"
+                alt=""
+            >
+            <div id="background-overlay"></div>
+            <div id="background-transition"></div>
+        </div>
+
+        <!-- ================= TOP CONTROLS ================= -->
+        <header id="top-controls">
+
+            <!-- Listening Status -->
+            <p id="listening-status" role="status" aria-live="polite">
+                <span id="listening-status-dot" aria-hidden="true">●</span>
+                <span id="listening-status-text">Listening</span>
+            </p>
+
+            <!-- Background Progress Ring -->
+            <div id="background-progress" aria-hidden="true">
+                <svg viewBox="0 0 40 40" width="36" height="36">
+                    <circle
+                        class="progress-ring-track"
+                        cx="20"
+                        cy="20"
+                        r="17"
+                        fill="none"
+                        stroke-width="2"
+                    ></circle>
+                    <circle
+                        id="progress-ring-fill"
+                        class="progress-ring-fill"
+                        cx="20"
+                        cy="20"
+                        r="17"
+                        fill="none"
+                        stroke-width="2"
+                    ></circle>
+                </svg>
+            </div>
+
+            <!-- Theme Selector Trigger -->
+            <button
+                type="button"
+                id="theme-toggle"
+                class="icon-btn"
+                aria-label="Choose listening mood"
+                title="Choose listening mood"
+                aria-expanded="false"
+                aria-controls="theme-panel"
+            >
+                <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+                    <path d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9z"></path>
+                </svg>
+            </button>
+
+        </header>
+
+        <!-- ================= BOTTOM-LEFT: ABOUT THIS WEBSITE ================= -->
+        <button
+            type="button"
+            id="about-toggle"
+            class="corner-btn corner-btn--left"
+            aria-expanded="false"
+            aria-controls="about-panel"
+        >
+            About this website
+        </button>
+
+        <!-- ================= BOTTOM-RIGHT: SLEEP TIMER ================= -->
+        <button
+            type="button"
+            id="sleep-timer-toggle"
+            class="corner-btn corner-btn--right"
+            aria-expanded="false"
+            aria-controls="sleep-timer-panel"
+        >
+            Sleep Timer
+        </button>
+
+        <!-- ================= GLASS MUSIC PLAYER ================= -->
+        <section id="music-player" aria-label="Music player">
+
+            <!-- Song Artwork -->
+            <div id="player-art">
+                <img
+                    id="track-art"
+                    src="assets/images/night/night-01.jpg"
+                    alt="Current track artwork"
+                >
+            </div>
+
+            <!-- Song Information -->
+            <div id="player-info">
+                <p id="track-title">Night Vibes</p>
+                <p id="track-artist">YouTube</p>
+            </div>
+
+            <!-- Progress Bar -->
+            <div id="player-progress">
+                <span id="current-time" aria-hidden="true">00:00</span>
+                <input
+                    type="range"
+                    id="music-progress"
+                    min="0"
+                    max="100"
+                    value="0"
+                    step="0.1"
+                    aria-label="Seek track position"
+                >
+                <span id="total-time" aria-hidden="true">00:00</span>
+            </div>
+
+            <!-- Playback Controls -->
+            <div id="player-controls">
+
+                <button
+                    type="button"
+                    id="shuffle-btn"
+                    class="icon-btn"
+                    aria-label="Shuffle playback"
+                    title="Shuffle playback"
+                    aria-pressed="false"
+                >
+                    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
+                        <path d="M4 6h3l9 12h4M4 18h3l3-4M16 6h4l-2-2m2 2-2 2"></path>
+                    </svg>
+                </button>
+
+                <button
+                    type="button"
+                    id="previous-btn"
+                    class="icon-btn"
+                    aria-label="Previous track"
+                    title="Previous track"
+                >
+                    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+                        <path d="M6 6v12M18 6l-9 6 9 6V6z"></path>
+                    </svg>
+                </button>
+
+                <button
+                    type="button"
+                    id="play-pause-btn"
+                    class="icon-btn icon-btn--primary"
+                    aria-label="Play"
+                    title="Play"
+                    aria-pressed="false"
+                >
+                    <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
+                        <path d="M8 5v14l11-7z"></path>
+                    </svg>
+                </button>
+
+                <button
+                    type="button"
+                    id="next-btn"
+                    class="icon-btn"
+                    aria-label="Next track"
+                    title="Next track"
+                >
+                    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+                        <path d="M18 6v12M6 6l9 6-9 6V6z"></path>
+                    </svg>
+                </button>
+
+            </div>
+
+            <!-- Volume -->
+            <div id="player-volume">
+                <button
+                    type="button"
+                    id="mute-btn"
+                    class="icon-btn"
+                    aria-label="Mute"
+                    title="Mute"
+                    aria-pressed="false"
+                >
+                    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
+                        <path d="M4 9v6h4l5 5V4L8 9H4z"></path>
+                    </svg>
+                </button>
+                <input
+                    type="range"
+                    id="volume-control"
+                    min="0"
+                    max="100"
+                    value="70"
+                    step="1"
+                    aria-label="Volume"
+                >
+            </div>
+
+        </section>
+
+        <!-- ================= THEME SELECTION PANEL ================= -->
+        <section
+            id="theme-panel"
+            class="panel"
+            hidden
+            aria-label="Choose listening mood"
+        >
+            <div class="panel-header">
+                <h2 id="theme-panel-title">Choose Your Mood</h2>
+                <button
+                    type="button"
+                    class="icon-btn panel-close"
+                    id="theme-panel-close"
+                    aria-label="Close mood panel"
+                    title="Close"
+                >
+                    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
+                        <path d="M6 6l12 12M18 6L6 18"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <div id="theme-list" role="list">
+
+                <button type="button" class="theme-card" data-theme="night" role="listitem" aria-label="Night mood">
+                    <img class="theme-thumb" src="assets/images/night/night-01.jpg" alt="">
+                    <span class="theme-name">Night</span>
+                </button>
+
+                <button type="button" class="theme-card theme-card--placeholder" data-theme="study" role="listitem" aria-label="Study mood (coming soon)">
+                    <span class="theme-thumb theme-thumb--placeholder" aria-hidden="true"></span>
+                    <span class="theme-name">Study</span>
+                </button>
+
+                <button type="button" class="theme-card theme-card--placeholder" data-theme="morning" role="listitem" aria-label="Morning mood (coming soon)">
+                    <span class="theme-thumb theme-thumb--placeholder" aria-hidden="true"></span>
+                    <span class="theme-name">Morning</span>
+                </button>
+
+                <button type="button" class="theme-card theme-card--placeholder" data-theme="rain" role="listitem" aria-label="Rain mood (coming soon)">
+                    <span class="theme-thumb theme-thumb--placeholder" aria-hidden="true"></span>
+                    <span class="theme-name">Rain</span>
+                </button>
+
+                <button type="button" class="theme-card theme-card--placeholder" data-theme="safar" role="listitem" aria-label="Safar mood (coming soon)">
+                    <span class="theme-thumb theme-thumb--placeholder" aria-hidden="true"></span>
+                    <span class="theme-name">Safar</span>
+                </button>
+
+                <button type="button" class="theme-card theme-card--placeholder" data-theme="workout" role="listitem" aria-label="Workout mood (coming soon)">
+                    <span class="theme-thumb theme-thumb--placeholder" aria-hidden="true"></span>
+                    <span class="theme-name">Workout</span>
+                </button>
+
+            </div>
+        </section>
+
+        <!-- ================= ABOUT WEBSITE PANEL ================= -->
+        <section
+            id="about-panel"
+            class="panel"
+            hidden
+            aria-label="About this website"
+        >
+            <div class="panel-header">
+                <h2 id="about-panel-title">About this website</h2>
+                <button
+                    type="button"
+                    class="icon-btn panel-close"
+                    id="about-panel-close"
+                    aria-label="Close about panel"
+                    title="Close"
+                >
+                    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
+                        <path d="M6 6l12 12M18 6L6 18"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="panel-body">
+                <p id="about-description">
+                    Sukoon Station is a cinematic music-listening experience built around moods, visuals and music.
+                </p>
+
+                <h3 id="about-developers-title">Developed by</h3>
+                <ul id="about-developers-list">
+                    <li><a href="#" id="developer-one-link">Developer One</a></li>
+                    <li><a href="#" id="developer-two-link">Developer Two</a></li>
+                </ul>
+
+                <p id="about-version">Version 1.0</p>
+            </div>
+        </section>
+
+        <!-- ================= SLEEP TIMER PANEL ================= -->
+        <section
+            id="sleep-timer-panel"
+            class="panel"
+            hidden
+            aria-label="Sleep timer"
+        >
+            <div class="panel-header">
+                <h2 id="sleep-timer-panel-title">Sleep Timer</h2>
+                <button
+                    type="button"
+                    class="icon-btn panel-close"
+                    id="sleep-timer-panel-close"
+                    aria-label="Close sleep timer panel"
+                    title="Close"
+                >
+                    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
+                        <path d="M6 6l12 12M18 6L6 18"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="panel-body">
+                <p id="sleep-countdown" role="status" aria-live="polite">Off</p>
+
+                <div id="sleep-timer-options" role="list">
+                    <button type="button" class="timer-option" data-timer="off" role="listitem">Off</button>
+                    <button type="button" class="timer-option" data-timer="30" role="listitem">30 Minutes</button>
+                    <button type="button" class="timer-option" data-timer="50" role="listitem">50 Minutes</button>
+                    <button type="button" class="timer-option" data-timer="60" role="listitem">1 Hour</button>
+                    <button type="button" class="timer-option" data-timer="120" role="listitem">2 Hours</button>
+                    <button type="button" class="timer-option" data-timer="custom" role="listitem">Custom</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= ACCESSIBILITY / LIVE REGIONS ================= -->
+        <p id="player-status" class="sr-only" role="status" aria-live="polite"></p>
+
+    </main>
+
+    <!-- ================= JAVASCRIPT LINKS ================= -->
+    <script src="js/themes.js" defer></script>
+    <script src="js/player.js" defer></script>
+    <script src="js/timer.js" defer></script>
+    <script src="js/script.js" defer></script>
+
+</body>
+</html>

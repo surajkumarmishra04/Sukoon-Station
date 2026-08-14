@@ -1,0 +1,366 @@
+/* =====================================================
+   SUKOON STATION — animations.css
+   Visual animations & transitions only
+   (structure: index.html · desktop: style.css · layout: responsive.css)
+   ===================================================== */
+
+/* =====================================================
+   1. BACKGROUND TRANSITIONS
+   ===================================================== */
+
+/* Reusable state classes for JS-driven background cross-fades */
+#background-image,
+#background-transition {
+    transition: opacity 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: opacity;
+}
+
+.background-visible {
+    opacity: 1;
+}
+
+.background-fading {
+    opacity: 0.5;
+}
+
+.background-hidden {
+    opacity: 0;
+}
+
+/* =====================================================
+   2. BACKGROUND AMBIENT MOTION
+   ===================================================== */
+
+/* Extremely slow, barely perceptible drift — purely ambient */
+@keyframes background-drift {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.015);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+#background-image {
+    animation: background-drift 26s ease-in-out infinite;
+    transform-origin: center;
+}
+
+/* =====================================================
+   3. PLAYER ANIMATIONS
+   ===================================================== */
+
+/* Entrance on load */
+@keyframes player-entrance {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(14px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+#music-player {
+    animation: player-entrance 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: 0.1s;
+    transition: box-shadow 0.32s cubic-bezier(0.4, 0, 0.2, 1),
+        transform 0.32s cubic-bezier(0.4, 0, 0.2, 1),
+        background 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Hover glow — desktop / real-pointer devices only (see section 10) */
+@media (hover: hover) and (pointer: fine) {
+    #music-player:hover,
+    #music-player:focus-within {
+        transform: translateX(-50%) translateY(-2px);
+    }
+}
+
+/* Top control entrance — staggered so it doesn't feel mechanical */
+@keyframes control-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#listening-status {
+    animation: control-fade-in 0.6s cubic-bezier(0.4, 0, 0.2, 1) both;
+    animation-delay: 0.15s;
+}
+
+#background-progress {
+    animation: control-fade-in 0.6s cubic-bezier(0.4, 0, 0.2, 1) both;
+    animation-delay: 0.25s;
+}
+
+#theme-toggle {
+    animation: control-fade-in 0.6s cubic-bezier(0.4, 0, 0.2, 1) both;
+    animation-delay: 0.35s;
+}
+
+/* Bottom control entrance */
+@keyframes bottom-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#about-toggle {
+    animation: bottom-fade-in 0.6s cubic-bezier(0.4, 0, 0.2, 1) both;
+    animation-delay: 0.3s;
+}
+
+#sleep-timer-toggle {
+    animation: bottom-fade-in 0.6s cubic-bezier(0.4, 0, 0.2, 1) both;
+    animation-delay: 0.3s;
+}
+
+/* =====================================================
+   4. BUTTON INTERACTIONS
+   ===================================================== */
+
+.icon-btn,
+.corner-btn,
+.timer-option,
+#theme-toggle,
+#about-developers-list a {
+    transition: background 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+        color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+        box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+        text-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+        transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Press feedback — all interactive buttons */
+.icon-btn:active,
+.corner-btn:active,
+.timer-option:active,
+.theme-card:active {
+    transform: scale(0.96);
+    transition-duration: 0.12s;
+}
+
+/* Play/Pause: slightly stronger hover response than other controls */
+@media (hover: hover) and (pointer: fine) {
+    #play-pause-btn.icon-btn--primary:hover {
+        transform: scale(1.04);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4), 0 0 16px var(--glow-subtle);
+    }
+}
+
+#play-pause-btn.icon-btn--primary:active {
+    transform: scale(0.96);
+}
+
+/* =====================================================
+   5. PANEL ANIMATIONS
+   ===================================================== */
+
+@keyframes panel-open {
+    from {
+        opacity: 0;
+        transform: scale(0.97) translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+@keyframes panel-close {
+    from {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: scale(0.98) translateY(4px);
+    }
+}
+
+.panel {
+    transform-origin: top center;
+}
+
+.panel.is-opening {
+    animation: panel-open 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.panel.is-closing {
+    animation: panel-close 0.2s cubic-bezier(0.4, 0, 1, 1) both;
+}
+
+/* Theme card hover/entrance */
+.theme-card {
+    transition: background 0.22s cubic-bezier(0.4, 0, 0.2, 1),
+        border-color 0.22s cubic-bezier(0.4, 0, 0.2, 1),
+        transform 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .theme-card:hover {
+        transform: translateY(-2px);
+    }
+}
+
+.theme-thumb {
+    transition: filter 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* =====================================================
+   6. PROGRESS INDICATORS
+   ===================================================== */
+
+/* Background rotation ring — smooth stroke updates driven by JS */
+.progress-ring-fill {
+    transition: stroke-dashoffset 0.4s linear;
+    shape-rendering: geometricPrecision;
+}
+
+/* Music progress — smooth visual catch-up when value is set by JS,
+   without animating continuously during normal playback */
+#music-progress {
+    transition: background 0.15s linear;
+}
+
+/* =====================================================
+   7. LISTENING STATE
+   ===================================================== */
+
+@keyframes listening-pulse {
+    0%,
+    100% {
+        opacity: 0.55;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+#listening-status-dot {
+    animation: listening-pulse 2s ease-in-out infinite;
+}
+
+/* =====================================================
+   8. TIMER STATE
+   ===================================================== */
+
+@keyframes timer-active-glow {
+    0%,
+    100% {
+        box-shadow: 0 0 0 1px var(--glow-subtle);
+        opacity: 1;
+    }
+    50% {
+        box-shadow: 0 0 0 1px var(--glow-strong);
+        opacity: 0.9;
+    }
+}
+
+.timer-option.is-active {
+    animation: timer-active-glow 3s ease-in-out infinite;
+}
+
+#sleep-countdown.is-active {
+    transition: opacity 0.4s ease-in-out;
+}
+
+/* =====================================================
+   9. REDUCED MOTION
+   ===================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+
+    #background-image,
+    #background-transition,
+    #music-player,
+    #listening-status,
+    #background-progress,
+    #theme-toggle,
+    #about-toggle,
+    #sleep-timer-toggle,
+    .icon-btn,
+    .corner-btn,
+    .timer-option,
+    .theme-card,
+    .theme-thumb,
+    .panel,
+    #about-developers-list a,
+    #listening-status-dot,
+    .timer-option.is-active {
+        animation: none !important;
+        transition-duration: 0.01ms !important;
+    }
+
+    #background-image {
+        transform: none !important;
+    }
+
+    #music-player {
+        opacity: 1;
+        transform: translateX(-50%);
+    }
+
+    .panel.is-opening,
+    .panel.is-closing {
+        opacity: 1;
+        transform: none;
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+        #music-player:hover,
+        #music-player:focus-within {
+            transform: translateX(-50%);
+        }
+
+        .theme-card:hover {
+            transform: none;
+        }
+
+        #play-pause-btn.icon-btn--primary:hover {
+            transform: none;
+        }
+    }
+}
+
+/* =====================================================
+   10. TOUCH / HOVER PROTECTION
+   ===================================================== */
+
+/* Ensures no hover-driven glow, lift, or brightness change can
+   get "stuck" after a tap on touch-only devices. All hover
+   micro-interactions above are already scoped with
+   (hover: hover) and (pointer: fine); this section explicitly
+   neutralizes any residual state on touch devices. */
+@media (hover: none) {
+
+    #music-player,
+    .icon-btn,
+    .corner-btn,
+    .theme-card,
+    .timer-option,
+    #theme-toggle,
+    #play-pause-btn.icon-btn--primary,
+    #about-developers-list a {
+        transform: none;
+    }
+
+    #music-player {
+        transform: translateX(-50%);
+    }
+}

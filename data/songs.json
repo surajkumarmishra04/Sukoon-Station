@@ -1,0 +1,168 @@
+{
+  "version": "1.0",
+  "source": "youtube",
+  "tracks": [
+    {
+      "id": "night-demo-01",
+      "title": "Night Track 01",
+      "artist": "Demo",
+      "youtubeId": "",
+      "theme": "night",
+      "thumbnail": "assets/images/night/night-01.jpg",
+      "source": "youtube"
+    },
+    {
+      "id": "night-demo-02",
+      "title": "Night Track 02",
+      "artist": "Demo",
+      "youtubeId": "",
+      "theme": "night",
+      "thumbnail": "assets/images/night/night-02.jpg",
+      "source": "youtube"
+    },
+    {
+      "id": "night-demo-03",
+      "title": "Night Track 03",
+      "artist": "Demo",
+      "youtubeId": "",
+      "theme": "night",
+      "thumbnail": "assets/images/night/night-03.jpg",
+      "source": "youtube"
+    },
+    {
+      "id": "study-demo-01",
+      "title": "Study Track 01",
+      "artist": "Demo",
+      "youtubeId": "",
+      "theme": "study",
+      "thumbnail": null,
+      "source": "youtube"
+    },
+    {
+      "id": "study-demo-02",
+      "title": "Study Track 02",
+      "artist": "Demo",
+      "youtubeId": "",
+      "theme": "study",
+      "thumbnail": null,
+      "source": "youtube"
+    },
+    {
+      "id": "study-demo-03",
+      "title": "Study Track 03",
+      "artist": "Demo",
+      "youtubeId": "",
+      "theme": "study",
+      "thumbnail": null,
+      "source": "youtube"
+    },
+    {
+      "id": "morning-demo-01",
+      "title": "Morning Track 01",
+      "artist": "Demo",
+      "youtubeId": "",
+      "theme": "morning",
+      "thumbnail": null,
+      "source": "youtube"
+    },
+    {
+      "id": "morning-demo-02",
+      "title": "Morning Track 02",
+      "artist": "Demo",
+      "youtubeId": "",
+      "theme": "morning",
+      "thumbnail": null,
+      "source": "youtube"
+    },
+    {
+      "id": "morning-demo-03",
+      "title": "Morning Track 03",
+      "artist": "Demo",
+      "youtubeId": "",
+      "theme": "morning",
+      "thumbnail": null,
+      "source": "youtube"
+    },
+    {
+      "id": "rain-demo-01",
+      "title": "Rain Track 01",
+      "artist": "Demo",
+      "youtubeId": "",
+      "theme": "rain",
+      "thumbnail": null,
+      "source": "youtube"
+    },
+    {
+      "id": "rain-demo-02",
+      "title": "Rain Track 02",
+      "artist": "Demo",
+      "youtubeId": "",
+      "theme": "rain",
+      "thumbnail": null,
+      "source": "youtube"
+    },
+    {
+      "id": "rain-demo-03",
+      "title": "Rain Track 03",
+      "artist": "Demo",
+      "youtubeId": "",
+      "theme": "rain",
+      "thumbnail": null,
+      "source": "youtube"
+    },
+    {
+      "id": "safar-demo-01",
+      "title": "Safar Track 01",
+      "artist": "Demo",
+      "youtubeId": "",
+      "theme": "safar",
+      "thumbnail": null,
+      "source": "youtube"
+    },
+    {
+      "id": "safar-demo-02",
+      "title": "Safar Track 02",
+      "artist": "Demo",
+      "youtubeId": "",
+      "theme": "safar",
+      "thumbnail": null,
+      "source": "youtube"
+    },
+    {
+      "id": "safar-demo-03",
+      "title": "Safar Track 03",
+      "artist": "Demo",
+      "youtubeId": "",
+      "theme": "safar",
+      "thumbnail": null,
+      "source": "youtube"
+    },
+    {
+      "id": "workout-demo-01",
+      "title": "Workout Track 01",
+      "artist": "Demo",
+      "youtubeId": "",
+      "theme": "workout",
+      "thumbnail": null,
+      "source": "youtube"
+    },
+    {
+      "id": "workout-demo-02",
+      "title": "Workout Track 02",
+      "artist": "Demo",
+      "youtubeId": "",
+      "theme": "workout",
+      "thumbnail": null,
+      "source": "youtube"
+    },
+    {
+      "id": "workout-demo-03",
+      "title": "Workout Track 03",
+      "artist": "Demo",
+      "youtubeId": "",
+      "theme": "workout",
+      "thumbnail": null,
+      "source": "youtube"
+    }
+  ]
+}

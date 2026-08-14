@@ -1,0 +1,427 @@
+/* =====================================================
+   SUKOON STATION — responsive.css
+   Responsive behavior only (desktop rules live in style.css)
+   ===================================================== */
+
+/* =====================================================
+   0. VIEWPORT / SAFE-AREA FOUNDATION
+   ===================================================== */
+
+#app {
+    height: 100vh;
+    height: 100dvh;
+}
+
+body {
+    overflow-x: hidden;
+}
+
+/* =====================================================
+   1. HOVER-ONLY BEHAVIOR
+   ===================================================== */
+
+/* Desktop / hover-capable devices only: allow the glass
+   glow + lift interaction defined in style.css. */
+@media (hover: hover) and (pointer: fine) {
+    #music-player:hover {
+        background: var(--glass-bg-strong);
+        box-shadow: var(--glass-shadow), 0 0 34px var(--glow-subtle),
+            inset 0 1px 0 var(--glass-highlight);
+        transform: translateX(-50%) translateY(-2px);
+    }
+}
+
+/* Touch devices: remove hover-driven states so nothing
+   gets "stuck" glowing after a tap. */
+@media (hover: none) {
+    #music-player:hover {
+        background: var(--glass-bg);
+        box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
+        transform: translateX(-50%);
+    }
+
+    .icon-btn:hover,
+    .corner-btn:hover,
+    .theme-card:hover,
+    .timer-option:hover,
+    #theme-toggle:hover,
+    #about-developers-list a:hover {
+        background: initial;
+        color: inherit;
+        text-shadow: none;
+    }
+}
+
+/* =====================================================
+   2. TABLET — 768px to 1024px
+   ===================================================== */
+
+@media screen and (max-width: 1024px) {
+
+    #top-controls {
+        top: max(24px, env(safe-area-inset-top));
+        right: max(24px, env(safe-area-inset-right));
+        gap: 12px;
+    }
+
+    #listening-status {
+        top: max(28px, env(safe-area-inset-top));
+        left: max(24px, env(safe-area-inset-left));
+    }
+
+    #music-player {
+        width: min(88vw, 520px);
+        bottom: max(24px, env(safe-area-inset-bottom));
+    }
+
+    .corner-btn--left {
+        left: max(24px, env(safe-area-inset-left));
+    }
+
+    .corner-btn--right {
+        right: max(24px, env(safe-area-inset-right));
+    }
+
+    #theme-panel {
+        top: max(72px, calc(env(safe-area-inset-top) + 64px));
+        right: max(24px, env(safe-area-inset-right));
+    }
+
+    #about-panel {
+        left: max(24px, env(safe-area-inset-left));
+    }
+
+    #sleep-timer-panel {
+        right: max(24px, env(safe-area-inset-right));
+    }
+}
+
+/* =====================================================
+   3. MOBILE — 480px to 767px
+   ===================================================== */
+
+@media screen and (max-width: 767px) {
+
+    /* ---- Top controls ---- */
+    #top-controls {
+        top: max(18px, env(safe-area-inset-top));
+        right: max(16px, env(safe-area-inset-right));
+        gap: 8px;
+    }
+
+    #theme-toggle {
+        width: 34px;
+        height: 34px;
+    }
+
+    #background-progress {
+        width: 28px;
+        height: 28px;
+    }
+
+    /* ---- Listening status ---- */
+    #listening-status {
+        top: max(20px, env(safe-area-inset-top));
+        left: max(16px, env(safe-area-inset-left));
+        font-size: clamp(10px, 2.6vw, 12px);
+        gap: 5px;
+        white-space: nowrap;
+    }
+
+    /* ---- Bottom layout: About / Sleep Timer sit above the player ---- */
+    .corner-btn {
+        bottom: calc(var(--player-mobile-height, 92px) + 22px);
+        font-size: 11.5px;
+    }
+
+    .corner-btn--left {
+        left: max(16px, env(safe-area-inset-left));
+    }
+
+    .corner-btn--right {
+        right: max(16px, env(safe-area-inset-right));
+    }
+
+    /* ---- Music player ---- */
+    #music-player {
+        width: calc(100vw - 24px);
+        max-width: 420px;
+        bottom: max(16px, env(safe-area-inset-bottom));
+        padding: 10px 14px;
+        gap: 12px;
+        border-radius: 20px;
+    }
+
+    #player-art {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+    }
+
+    #player-info {
+        min-width: 64px;
+        max-width: 92px;
+    }
+
+    #track-title {
+        font-size: 12.5px;
+    }
+
+    #track-artist {
+        font-size: 10px;
+    }
+
+    #player-progress {
+        min-width: 70px;
+        gap: 6px;
+    }
+
+    #current-time,
+    #total-time {
+        font-size: 9.5px;
+    }
+
+    /* Comfortable touch area for the thin progress track */
+    #music-progress {
+        height: 3px;
+        padding: 10px 0;
+        background-clip: content-box;
+    }
+
+    #player-controls {
+        gap: 2px;
+    }
+
+    .icon-btn {
+        width: 36px;
+        height: 36px;
+    }
+
+    #shuffle-btn {
+        width: 30px;
+        height: 30px;
+    }
+
+    #play-pause-btn.icon-btn--primary {
+        width: 42px;
+        height: 42px;
+    }
+
+    /* Volume control tucks away on mobile to protect space
+       for the primary transport controls */
+    #player-volume {
+        display: none;
+    }
+
+    /* ---- Theme panel ---- */
+    #theme-panel {
+        top: max(64px, calc(env(safe-area-inset-top) + 56px));
+        right: max(14px, env(safe-area-inset-right));
+        left: max(14px, env(safe-area-inset-left));
+        width: auto;
+        max-height: min(60vh, 420px);
+    }
+
+    #theme-list {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+
+    .theme-card {
+        padding: 6px;
+        min-height: 44px;
+    }
+
+    .theme-name {
+        font-size: 11px;
+    }
+
+    /* ---- About panel ---- */
+    #about-panel {
+        left: max(14px, env(safe-area-inset-left));
+        right: max(14px, env(safe-area-inset-right));
+        bottom: calc(var(--player-mobile-height, 92px) + 78px);
+        width: auto;
+        max-height: min(55vh, 360px);
+    }
+
+    /* ---- Sleep timer panel ---- */
+    #sleep-timer-panel {
+        left: max(14px, env(safe-area-inset-left));
+        right: max(14px, env(safe-area-inset-right));
+        bottom: calc(var(--player-mobile-height, 92px) + 78px);
+        width: auto;
+        max-height: min(55vh, 360px);
+    }
+
+    #sleep-timer-options {
+        gap: 6px;
+    }
+
+    .timer-option {
+        width: 100%;
+        padding: 12px 14px;
+        font-size: 13px;
+        min-height: 44px;
+    }
+}
+
+/* =====================================================
+   4. SMALL MOBILE — below 480px
+   ===================================================== */
+
+@media screen and (max-width: 479px) {
+
+    #listening-status {
+        font-size: 10px;
+    }
+
+    #listening-status-text {
+        letter-spacing: 0.02em;
+    }
+
+    .corner-btn {
+        font-size: 11px;
+        bottom: calc(var(--player-mobile-height, 84px) + 18px);
+    }
+
+    #music-player {
+        width: calc(100vw - 16px);
+        padding: 9px 12px;
+        gap: 10px;
+        border-radius: 18px;
+    }
+
+    #player-art {
+        width: 36px;
+        height: 36px;
+    }
+
+    #player-info {
+        min-width: 52px;
+        max-width: 76px;
+    }
+
+    #track-title {
+        font-size: 11.5px;
+    }
+
+    #track-artist {
+        font-size: 9.5px;
+    }
+
+    #shuffle-btn {
+        display: none;
+    }
+
+    #player-controls {
+        gap: 0;
+    }
+
+    .icon-btn {
+        width: 34px;
+        height: 34px;
+    }
+
+    #play-pause-btn.icon-btn--primary {
+        width: 40px;
+        height: 40px;
+    }
+
+    #theme-panel,
+    #about-panel,
+    #sleep-timer-panel {
+        left: 10px;
+        right: 10px;
+        padding: 16px;
+    }
+
+    #theme-list {
+        gap: 6px;
+    }
+}
+
+/* =====================================================
+   5. LANDSCAPE MOBILE / SHORT-HEIGHT DEVICES
+   ===================================================== */
+
+@media screen and (max-height: 480px) and (orientation: landscape) {
+
+    #top-controls {
+        top: max(10px, env(safe-area-inset-top));
+        gap: 8px;
+    }
+
+    #listening-status {
+        top: max(12px, env(safe-area-inset-top));
+    }
+
+    #music-player {
+        bottom: max(10px, env(safe-area-inset-bottom));
+        padding: 6px 12px;
+        gap: 10px;
+        border-radius: 16px;
+    }
+
+    #player-art {
+        width: 32px;
+        height: 32px;
+    }
+
+    .icon-btn {
+        width: 30px;
+        height: 30px;
+    }
+
+    #play-pause-btn.icon-btn--primary {
+        width: 36px;
+        height: 36px;
+    }
+
+    .corner-btn {
+        bottom: calc(var(--player-mobile-height, 60px) + 12px);
+        font-size: 10.5px;
+    }
+
+    #theme-panel,
+    #about-panel,
+    #sleep-timer-panel {
+        max-height: 80vh;
+        padding: 14px;
+    }
+
+    #theme-panel {
+        top: max(50px, env(safe-area-inset-top));
+    }
+}
+
+/* =====================================================
+   6. SHORT DESKTOP SCREENS
+   ===================================================== */
+
+@media screen and (min-width: 1025px) and (max-height: 700px) {
+
+    #music-player {
+        bottom: 16px;
+        padding: 9px 16px;
+    }
+
+    #player-art {
+        width: 38px;
+        height: 38px;
+    }
+
+    .corner-btn {
+        bottom: 18px;
+    }
+
+    #theme-panel {
+        top: 64px;
+        max-height: 60vh;
+    }
+
+    #about-panel,
+    #sleep-timer-panel {
+        max-height: 55vh;
+    }
+}
