@@ -1,0 +1,776 @@
+/* ==================================================
+   1. EASY CUSTOMIZATION
+   ================================================== */
+:root {
+    --glass-blur: 18px;
+    --glass-bg: rgba(18, 20, 26, 0.45);
+    --glass-bg-hover: rgba(255, 255, 255, 0.12);
+    --glass-bg-active: rgba(255, 255, 255, 0.18);
+
+    --glass-border: rgba(255, 255, 255, 0.09);
+    --glass-border-hover: rgba(255, 255, 255, 0.22);
+    --glass-border-active: rgba(255, 255, 255, 0.38);
+
+    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.42);
+
+    --text-primary: #f8fafc;
+    --text-secondary: rgba(248, 250, 252, 0.65);
+    --text-muted: rgba(248, 250, 252, 0.4);
+
+    --radius-pill: 9999px;
+    --radius-panel: 20px;
+    --radius-artwork: 12px;
+
+    --player-max-width: 640px;
+    --bottom-spacing: 28px;
+    --transition-speed: 0.24s;
+}
+
+/* ==================================================
+   2. GLOBAL RESET
+   ================================================== */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--text-primary);
+    background-color: #0b0d13;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+button {
+    font-family: inherit;
+    color: inherit;
+    border: none;
+    background: none;
+    cursor: pointer;
+    outline: none;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+ul {
+    list-style: none;
+}
+
+/* ==================================================
+   3. FULL-SCREEN BACKGROUND
+   ================================================== */
+#background,
+.background-layer {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: 0;
+    pointer-events: none;
+}
+
+#bg-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+    transition: opacity 0.5s ease;
+}
+
+#background::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35);
+    pointer-events: none;
+}
+
+/* ==================================================
+   4. GLASS EFFECT
+   ================================================== */
+.glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    transition: background-color var(--transition-speed) ease,
+                border-color var(--transition-speed) ease,
+                box-shadow var(--transition-speed) ease,
+                transform var(--transition-speed) ease;
+}
+
+.pill-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-pill);
+    padding: 10px 18px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    white-space: nowrap;
+    user-select: none;
+}
+
+.pill-button:hover {
+    background: var(--glass-bg-hover);
+    border-color: var(--glass-border-hover);
+}
+
+.pill-button:active,
+.pill-button[aria-expanded="true"] {
+    background: var(--glass-bg-active);
+    border-color: var(--glass-border-active);
+}
+
+/* ==================================================
+   5. MAIN APP LAYOUT
+   ================================================== */
+.app-layout {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    overflow: hidden;
+}
+
+/* Hidden YouTube Player Wrapper */
+#youtube-player {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+/* ==================================================
+   6. LIVE CLOCK
+   ================================================== */
+#live-clock {
+    position: absolute;
+    top: max(24px, env(safe-area-inset-top, 24px));
+    left: max(24px, env(safe-area-inset-left, 24px));
+    font-variant-numeric: tabular-nums;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    cursor: default;
+}
+
+/* ==================================================
+   7. OG PLAYLIST
+   ================================================== */
+#og-playlist-btn {
+    position: absolute;
+    top: max(24px, env(safe-area-inset-top, 24px));
+    right: max(24px, env(safe-area-inset-right, 24px));
+}
+
+/* ==================================================
+   8. FLOATING PANELS
+   ================================================== */
+.floating-panel {
+    position: absolute;
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    border-radius: var(--radius-panel);
+    padding: 20px;
+    max-height: 75vh;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--glass-border-hover) transparent;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(8px) scale(0.98);
+    transition: opacity var(--transition-speed) ease,
+                transform var(--transition-speed) ease,
+                visibility var(--transition-speed) ease;
+    z-index: 50;
+}
+
+.floating-panel::-webkit-scrollbar {
+    width: 4px;
+}
+
+.floating-panel::-webkit-scrollbar-thumb {
+    background: var(--glass-border-hover);
+    border-radius: var(--radius-pill);
+}
+
+.floating-panel.open,
+.floating-panel:not([hidden]) {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+}
+
+.floating-panel[hidden] {
+    display: none;
+}
+
+.panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.panel-header h2 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.close-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    font-size: 18px;
+    color: var(--text-secondary);
+    transition: color var(--transition-speed) ease,
+                background-color var(--transition-speed) ease;
+}
+
+.close-btn:hover {
+    color: var(--text-primary);
+    background: var(--glass-bg-hover);
+}
+
+/* Specific Panel Placements */
+#playlist-panel {
+    top: calc(max(24px, env(safe-area-inset-top, 24px)) + 46px);
+    right: max(24px, env(safe-area-inset-right, 24px));
+    width: calc(100% - 48px);
+    max-width: 400px;
+}
+
+#about-panel {
+    bottom: calc(max(var(--bottom-spacing), env(safe-area-inset-bottom, 28px)) + 46px);
+    left: max(24px, env(safe-area-inset-left, 24px));
+    width: calc(100% - 48px);
+    max-width: 380px;
+}
+
+#timer-panel {
+    bottom: calc(max(var(--bottom-spacing), env(safe-area-inset-bottom, 28px)) + 46px);
+    right: max(24px, env(safe-area-inset-right, 24px));
+    width: calc(100% - 48px);
+    max-width: 340px;
+}
+
+/* ==================================================
+   9. PLAYLIST ITEMS
+   ================================================== */
+#playlist-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.playlist-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
+    cursor: pointer;
+    transition: background-color var(--transition-speed) ease,
+                border-color var(--transition-speed) ease;
+    text-align: left;
+    width: 100%;
+}
+
+.playlist-item:hover {
+    background: var(--glass-bg-hover);
+    border-color: var(--glass-border-hover);
+}
+
+.playlist-item.active {
+    background: var(--glass-bg-active);
+    border-color: var(--glass-border-active);
+}
+
+.playlist-item-art {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.playlist-item-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.playlist-item-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.playlist-item-desc {
+    font-size: 11px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ==================================================
+   10. ABOUT
+   ================================================== */
+#about-btn {
+    position: absolute;
+    bottom: max(var(--bottom-spacing), env(safe-area-inset-bottom, 28px));
+    left: max(24px, env(safe-area-inset-left, 24px));
+}
+
+.panel-content p {
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+}
+
+.developer-section h3 {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+}
+
+.developer-links {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.developer-links a {
+    display: inline-block;
+    font-size: 13px;
+    color: var(--text-primary);
+    transition: color var(--transition-speed) ease;
+}
+
+.developer-links a:hover {
+    color: #ffffff;
+    text-decoration: underline;
+}
+
+/* ==================================================
+   11. SLEEP TIMER
+   ================================================== */
+#sleep-timer-btn {
+    position: absolute;
+    bottom: max(var(--bottom-spacing), env(safe-area-inset-bottom, 28px));
+    right: max(24px, env(safe-area-inset-right, 24px));
+    font-variant-numeric: tabular-nums;
+}
+
+.timer-display {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 14px;
+}
+
+#sleep-countdown {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+}
+
+.timer-options {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+}
+
+.timer-select-btn {
+    padding: 8px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--glass-border);
+    transition: background-color var(--transition-speed) ease,
+                border-color var(--transition-speed) ease,
+                color var(--transition-speed) ease;
+}
+
+.timer-select-btn:hover {
+    color: var(--text-primary);
+    background: var(--glass-bg-hover);
+    border-color: var(--glass-border-hover);
+}
+
+.timer-select-btn.active {
+    color: var(--text-primary);
+    background: var(--glass-bg-active);
+    border-color: var(--glass-border-active);
+}
+
+/* ==================================================
+   12. MUSIC PLAYER
+   ================================================== */
+.music-player-container,
+#music-player {
+    position: absolute;
+    bottom: max(var(--bottom-spacing), env(safe-area-inset-bottom, 28px));
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(var(--player-max-width), calc(100% - 48px));
+    display: flex;
+    align-items: center;
+    padding: 10px 18px;
+    gap: 16px;
+    border-radius: var(--radius-pill);
+    z-index: 20;
+}
+
+.music-player-container:hover {
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
+    border-color: var(--glass-border-hover);
+}
+
+.track-artwork,
+#track-art {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-artwork);
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+#track-art-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.track-info,
+.track-metadata {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+    flex: 1 1 140px;
+    gap: 2px;
+}
+
+#track-title {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#track-artist {
+    font-size: 11.5px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.player-controls-container {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex: 2 1 240px;
+}
+
+.player-buttons,
+.playback-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.control-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    color: var(--text-secondary);
+    font-size: 12px;
+    transition: color var(--transition-speed) ease,
+                background-color var(--transition-speed) ease,
+                transform var(--transition-speed) ease;
+}
+
+.control-btn:hover {
+    color: var(--text-primary);
+    background: var(--glass-bg-hover);
+}
+
+.control-btn:active {
+    transform: scale(0.94);
+}
+
+.play-btn,
+#play-pause-btn {
+    width: 36px;
+    height: 36px;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-primary);
+    font-size: 13px;
+}
+
+.play-btn:hover,
+#play-pause-btn:hover {
+    background: var(--glass-bg-active);
+}
+
+/* ==================================================
+   13. PROGRESS BAR
+   ================================================== */
+.progress-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+}
+
+.time-label,
+#current-time,
+#total-time {
+    font-size: 10.5px;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-muted);
+    flex-shrink: 0;
+}
+
+.progress-slider,
+#music-progress {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 4px;
+    border-radius: var(--radius-pill);
+    background: rgba(255, 255, 255, 0.15);
+    outline: none;
+    cursor: pointer;
+    transition: background-color var(--transition-speed) ease;
+}
+
+.progress-slider:hover,
+#music-progress:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+/* WebKit Slider Thumb */
+.progress-slider::-webkit-slider-thumb,
+#music-progress::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #ffffff;
+    cursor: pointer;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.4);
+    transition: transform var(--transition-speed) ease;
+}
+
+.progress-slider::-webkit-slider-thumb:hover,
+#music-progress::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+}
+
+/* Firefox Slider Thumb */
+.progress-slider::-moz-range-thumb,
+#music-progress::-moz-range-thumb {
+    width: 10px;
+    height: 10px;
+    border: none;
+    border-radius: 50%;
+    background: #ffffff;
+    cursor: pointer;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.4);
+    transition: transform var(--transition-speed) ease;
+}
+
+.progress-slider::-moz-range-thumb:hover,
+#music-progress::-moz-range-thumb:hover {
+    transform: scale(1.2);
+}
+
+/* Firefox Track */
+.progress-slider::-moz-range-track,
+#music-progress::-moz-range-track {
+    height: 4px;
+    border-radius: var(--radius-pill);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+/* ==================================================
+   14. RESPONSIVE DESIGN
+   ================================================== */
+@media (max-width: 768px) {
+    .music-player-container,
+    #music-player {
+        width: calc(100% - 24px);
+        bottom: calc(max(var(--bottom-spacing), env(safe-area-inset-bottom, 28px)) + 48px);
+        padding: 8px 12px;
+        gap: 10px;
+    }
+
+    .track-artwork,
+    #track-art {
+        width: 40px;
+        height: 40px;
+    }
+
+    .track-info,
+    .track-metadata {
+        flex: 1 1 90px;
+    }
+
+    #track-title {
+        font-size: 12.5px;
+    }
+
+    #track-artist {
+        font-size: 10.5px;
+    }
+
+    .player-controls-container {
+        gap: 8px;
+        flex: 1.5 1 150px;
+    }
+
+    .control-btn {
+        width: 28px;
+        height: 28px;
+        font-size: 10px;
+    }
+
+    .play-btn,
+    #play-pause-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 11px;
+    }
+
+    #live-clock {
+        top: max(16px, env(safe-area-inset-top, 16px));
+        left: max(16px, env(safe-area-inset-left, 16px));
+        padding: 8px 14px;
+        font-size: 12px;
+    }
+
+    #og-playlist-btn {
+        top: max(16px, env(safe-area-inset-top, 16px));
+        right: max(16px, env(safe-area-inset-right, 16px));
+        padding: 8px 14px;
+        font-size: 12px;
+    }
+
+    #about-btn {
+        bottom: max(16px, env(safe-area-inset-bottom, 16px));
+        left: max(16px, env(safe-area-inset-left, 16px));
+        padding: 8px 14px;
+        font-size: 12px;
+    }
+
+    #sleep-timer-btn {
+        bottom: max(16px, env(safe-area-inset-bottom, 16px));
+        right: max(16px, env(safe-area-inset-right, 16px));
+        padding: 8px 14px;
+        font-size: 12px;
+    }
+
+    #playlist-panel,
+    #about-panel,
+    #timer-panel {
+        width: calc(100% - 24px);
+        left: 12px;
+        right: 12px;
+        max-width: none;
+        max-height: 70vh;
+    }
+
+    #playlist-panel {
+        top: calc(max(16px, env(safe-area-inset-top, 16px)) + 42px);
+    }
+
+    #about-panel,
+    #timer-panel {
+        bottom: calc(max(var(--bottom-spacing), env(safe-area-inset-bottom, 28px)) + 104px);
+    }
+}
+
+@media (max-width: 480px) {
+    .time-label,
+    #current-time,
+    #total-time {
+        display: none;
+    }
+
+    .player-controls-container {
+        gap: 6px;
+    }
+}
+
+/* ==================================================
+   15. ACCESSIBILITY
+   ================================================== */
+button:focus-visible,
+input:focus-visible,
+a:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.8);
+    outline-offset: 2px;
+}
+
+/* ==================================================
+   16. REDUCED MOTION
+   ================================================== */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
